@@ -3,12 +3,39 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from watchnext.common import get_paths
 from watchnext.data_loader import load_raw_data
-from watchnext.models.content_based import recommend_similar
+from watchnext.models.content_based import recommend_similar, train_content_model
+from watchnext.models.collaborative_filtering import train_collaborative_models
 from watchnext.models.hybrid_recommender import HybridRecommender
+from watchnext.models.neural_cf import train_neural_cf
 
+
+def ensure_models_trained():
+    """Check if model files exist; if not, trigger training."""
+    paths = get_paths()
+    required_files = [
+        paths.saved_models / "content_similarity.pkl",
+        paths.saved_models / "cf_svd.pkl",
+        paths.saved_models / "neural_cf.pt",
+    ]
+
+    if all(f.exists() for f in required_files):
+        return
+
+    print("Model files missing. Starting auto-training sequence (this may take a minute)...")
+    train_content_model()
+    train_collaborative_models()
+    train_neural_cf()
+    print("Auto-training complete.")
+
+
+# Initialize application components
+ensure_models_trained()
 dataset = load_raw_data()
-movies = dataset["movies"].merge(dataset["links"][["movieId", "tmdbId"]], on="movieId", how="left")
+movies = dataset["movies"].merge(
+    dataset["links"][["movieId", "tmdbId"]], on="movieId", how="left"
+)
 recommender = HybridRecommender()
 
 app = FastAPI(title="WatchNext AI API")

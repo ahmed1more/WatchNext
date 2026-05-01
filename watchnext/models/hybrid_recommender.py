@@ -30,7 +30,13 @@ class HybridRecommender:
         self.user_counts = self.ratings.groupby("userId").size()
         self.movie_counts = self.ratings.groupby("movieId").size()
         self.user_seen = self.ratings.groupby("userId")["movieId"].apply(set).to_dict()
-        self.content_similarity = pd.read_pickle(self.model_dir / "content_similarity.pkl")
+        
+        similarity_path = self.model_dir / "content_similarity.pkl"
+        if similarity_path.exists():
+            self.content_similarity = pd.read_pickle(similarity_path)
+        else:
+            print(f"Warning: {similarity_path} not found. Content-based features will be limited.")
+            self.content_similarity = pd.DataFrame()
 
     def _normalize(self, scores: pd.Series) -> pd.Series:
         if scores.empty:
