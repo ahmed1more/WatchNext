@@ -3,6 +3,7 @@ from __future__ import annotations
 import pickle
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -35,14 +36,13 @@ def train_content_model(output_dir: Path | None = None) -> dict[str, Path]:
     tfidf = TfidfVectorizer(max_features=500, stop_words="english")
     tag_matrix = tfidf.fit_transform(movies["tag_text"])
 
-    feature_matrix = pd.concat(
-        [
-            pd.DataFrame(genre_matrix, index=movies["movieId"]),
-            pd.DataFrame(tag_matrix.toarray(), index=movies["movieId"]),
-        ],
-        axis=1,
-    )
-    similarity = cosine_similarity(feature_matrix)
+    # Optimization: Use float32 and concatenate numpy arrays directly to save memory
+    feature_matrix = np.hstack([
+        genre_matrix.astype(np.float32),
+        tag_matrix.toarray().astype(np.float32)
+    ])
+    
+    similarity = cosine_similarity(feature_matrix).astype(np.float32)
     similarity_df = pd.DataFrame(similarity, index=movies["movieId"], columns=movies["movieId"])
 
     similarity_path = target_dir / "content_similarity.pkl"

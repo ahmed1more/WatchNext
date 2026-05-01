@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -12,8 +14,9 @@ from watchnext.models.neural_cf import train_neural_cf
 
 
 def ensure_models_trained():
-    """Check if model files exist; if not, trigger training."""
+    """Check if model files exist; if not, trigger training with a lock to prevent race conditions."""
     paths = get_paths()
+    lock_file = paths.saved_models / ".init.lock"
     required_files = [
         paths.saved_models / "content_similarity.pkl",
         paths.saved_models / "cf_svd.pkl",
@@ -23,11 +26,32 @@ def ensure_models_trained():
     if all(f.exists() for f in required_files):
         return
 
-    print("Model files missing. Starting auto-training sequence (this may take a minute)...")
-    train_content_model()
-    train_collaborative_models()
-    train_neural_cf()
-    print("Auto-training complete.")
+    # Simple atomic directory-based lock for cross-platform/multi-worker support
+    lock_dir = paths.saved_models / "training.lock"
+    try:
+        lock_dir.mkdir(parents=True, exist_ok=False)
+    except FileExistsError:
+        print("Another process is already training models. Waiting...")
+        # Wait for the other process to finish (max 5 minutes)
+        for _ in range(60):
+            time.sleep(5)
+            if all(f.exists() for f in required_files):
+                print("Models discovered. Continuing.")
+                return
+        print("Timed out waiting for models. Proceeding anyway.")
+        return
+
+    try:
+        print("Model files missing. Starting auto-training sequence...")
+        train_content_model()
+        train_collaborative_models()
+        train_neural_cf()
+        print("Auto-training complete.")
+    finally:
+        try:
+            lock_dir.rmdir()
+        except Exception:
+            pass
 
 
 # Initialize application components
