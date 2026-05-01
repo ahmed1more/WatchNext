@@ -1,8 +1,8 @@
 import pandas as pd
-from data_loader import load_data, parent_dir
+from .data_loader import load_data
 
 
-movies, ratings = load_data(parent_dir)
+movies, ratings = load_data()
 
 
 def get_popular_movies(movies, ratings, min_ratings=50):
@@ -31,7 +31,7 @@ def get_popular_movies(movies, ratings, min_ratings=50):
 
 
 if __name__ == "__main__":
-    movies, ratings = load_data(parent_dir)
+    movies, ratings = load_data()
     
     top_movies = get_popular_movies(movies, ratings)
     

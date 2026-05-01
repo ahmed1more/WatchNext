@@ -11,8 +11,8 @@ from torch import nn
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
-from src.common import get_paths
-from src.data_loader import load_raw_data
+from watchnext.common import get_paths
+from watchnext.data_loader import load_raw_data
 
 
 class InteractionDataset(Dataset):

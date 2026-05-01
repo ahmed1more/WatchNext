@@ -23,3 +23,13 @@ dependencies = [
     "tqdm>=4.67.3",
     "uvicorn>=0.46.0",
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["watchnext*"]
+
+[tool.pyright]
+include = ["watchnext", "main.py", "api"]
+executionEnvironments = [
+  { root = "." }
+]

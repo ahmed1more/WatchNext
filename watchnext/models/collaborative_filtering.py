@@ -24,8 +24,8 @@ else:
 if not SURPRISE_AVAILABLE:
     Dataset = NMF = Reader = SVD = GridSearchCV = None
 
-from src.common import get_paths
-from src.data_loader import load_raw_data
+from watchnext.common import get_paths
+from watchnext.data_loader import load_raw_data
 
 
 def _build_trainset() -> tuple[pd.DataFrame, object]:

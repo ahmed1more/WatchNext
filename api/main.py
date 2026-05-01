@@ -3,9 +3,9 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.data_loader import load_raw_data
-from src.models.content_based import recommend_similar
-from src.models.hybrid_recommender import HybridRecommender
+from watchnext.data_loader import load_raw_data
+from watchnext.models.content_based import recommend_similar
+from watchnext.models.hybrid_recommender import HybridRecommender
 
 dataset = load_raw_data()
 movies = dataset["movies"].merge(dataset["links"][["movieId", "tmdbId"]], on="movieId", how="left")

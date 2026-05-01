@@ -9,8 +9,8 @@ from scipy.sparse import csr_matrix, save_npz
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import MultiLabelBinarizer
 
-from src.common import get_paths
-from src.data_loader import load_raw_data
+from watchnext.common import get_paths
+from watchnext.data_loader import load_raw_data
 
 
 def _extract_release_year(movies: pd.DataFrame) -> pd.Series:

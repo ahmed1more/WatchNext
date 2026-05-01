@@ -8,8 +8,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import MultiLabelBinarizer
 
-from src.common import get_paths
-from src.data_loader import load_raw_data
+from watchnext.common import get_paths
+from watchnext.data_loader import load_raw_data
 
 
 def train_content_model(output_dir: Path | None = None) -> dict[str, Path]:

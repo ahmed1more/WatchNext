@@ -6,12 +6,21 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src.common import get_paths
-from src.data_loader import load_raw_data
-from src.evaluation.metrics import coverage, mae, ndcg_at_k, novelty, precision_at_k, recall_at_k, rmse, temporal_train_test_split
-from src.models.collaborative_filtering import score_user_items as cf_score_user_items
-from src.models.content_based import recommend_similar
-from src.models.hybrid_recommender import HybridRecommender
+from watchnext.common import get_paths
+from watchnext.data_loader import load_raw_data
+from watchnext.evaluation.metrics import (
+    coverage,
+    mae,
+    ndcg_at_k,
+    novelty,
+    precision_at_k,
+    recall_at_k,
+    rmse,
+    temporal_train_test_split,
+)
+from watchnext.models.collaborative_filtering import score_user_items as cf_score_user_items
+from watchnext.models.content_based import recommend_similar
+from watchnext.models.hybrid_recommender import HybridRecommender
 
 
 def evaluate_models(output_path: Path | None = None, k: int = 10) -> dict[str, dict[str, float]]:

@@ -14,8 +14,8 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - optional dependency fallback
     sns = None
 
-from src.common import get_paths
-from src.data_loader import load_raw_data
+from watchnext.common import get_paths
+from watchnext.data_loader import load_raw_data
 
 
 def _extract_release_year(movies: pd.DataFrame) -> pd.Series:

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.common import RAW_DATA_DIR
+from watchnext.common import RAW_DATA_DIR
 
 
 def load_raw_data(csv_path: Path | None = None) -> dict[str, pd.DataFrame]:

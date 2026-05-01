@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.common import get_paths
-from src.data_loader import load_raw_data
-from src.models import collaborative_filtering, content_based, neural_cf
+from watchnext.common import get_paths
+from watchnext.data_loader import load_raw_data
+from watchnext.models import collaborative_filtering, content_based, neural_cf
 
 
 class HybridRecommender:
