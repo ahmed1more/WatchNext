@@ -5,16 +5,11 @@ import pickle
 
 
 # ===== Load Data =====
-movies = pd.read_csv("data/ml-latest-small/movies.csv")
-ratings = pd.read_csv("data/ml-latest-small/ratings.csv")
-
-
-
-app = FastAPI(title="WatchNext AI API")
-
-
+movies = pickle.load(open("models/movies.pkl", "rb"))
 predicted_df = pickle.load(open("models/predicted_df.pkl", "rb"))
 user_movie_matrix = pickle.load(open("models/user_movie_matrix.pkl", "rb"))
+
+app = FastAPI(title="WatchNext AI API")
 
 # ===== Recommendation Function =====
 def recommend_for_user(user_id, n=10):
