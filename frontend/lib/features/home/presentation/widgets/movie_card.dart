@@ -28,7 +28,7 @@ class _MovieCardState extends State<MovieCard> {
           curve: Curves.easeInOut,
           margin: const EdgeInsets.symmetric(horizontal: 4),
           transform: _isHovered
-              ? (Matrix4.identity()..scale(1.1, 1.1, 1.0))
+              ? Matrix4.diagonal3Values(1.1, 1.1, 1.0)
               : Matrix4.identity(),
           width: 160,
           decoration: BoxDecoration(
