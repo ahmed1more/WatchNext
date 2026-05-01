@@ -28,17 +28,26 @@ def ensure_models_trained():
 
     # Simple atomic directory-based lock for cross-platform/multi-worker support
     lock_dir = paths.saved_models / "training.lock"
+
+    # Stale lock recovery (e.g. if a previous container crashed during training)
+    if lock_dir.exists() and (time.time() - lock_dir.stat().st_mtime) > 600:
+        print("Detected stale training lock. Clearing and restarting training...")
+        try:
+            lock_dir.rmdir()
+        except Exception:
+            pass
+
     try:
         lock_dir.mkdir(parents=True, exist_ok=False)
     except FileExistsError:
-        print("Another process is already training models. Waiting...")
-        # Wait for the other process to finish (max 5 minutes)
-        for _ in range(60):
+        print("Another process is already training models. Waiting up to 10 mins...")
+        # Wait for the other process to finish (max 10 minutes)
+        for _ in range(120):
             time.sleep(5)
             if all(f.exists() for f in required_files):
                 print("Models discovered. Continuing.")
                 return
-        print("Timed out waiting for models. Proceeding anyway.")
+        print("Timed out waiting for models. Starting with fallback features.")
         return
 
     try:
