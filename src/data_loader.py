@@ -1,36 +1,30 @@
-import os
+from __future__ import annotations
+
 from pathlib import Path
+
 import pandas as pd
 
-
-parent_dir = Path("./data/ml-latest-small")
-
+from src.common import RAW_DATA_DIR
 
 
-def load_data(csv_path: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Loads movies and ratings datasets from CSV files.
-    
-    Args:
-        csv_path: Path to the directory containing movies.csv and ratings.csv
-        
-    Returns:
-        A tuple of two DataFrames: (movies, ratings)
-    """
-    movies = pd.read_csv(csv_path / "movies.csv")
-    ratings = pd.read_csv(csv_path / "ratings.csv")
-    
-    return movies, ratings
+def load_raw_data(csv_path: Path | None = None) -> dict[str, pd.DataFrame]:
+    """Load the MovieLens small dataset tables."""
+    base_path = csv_path or RAW_DATA_DIR
+    return {
+        "movies": pd.read_csv(base_path / "movies.csv"),
+        "ratings": pd.read_csv(base_path / "ratings.csv"),
+        "links": pd.read_csv(base_path / "links.csv"),
+        "tags": pd.read_csv(base_path / "tags.csv"),
+    }
+
+
+def load_data(csv_path: Path | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Backward-compatible loader returning movies and ratings only."""
+    dataset = load_raw_data(csv_path)
+    return dataset["movies"], dataset["ratings"]
 
 
 if __name__ == "__main__":
-    movies, ratings = load_data(parent_dir)
-    
-    print("Movies shape:", movies.shape)
-    print("Ratings shape:", ratings.shape)
-    
-    print("\nMovies sample:")
-    print(movies.head())
-    
-    print("\nRatings sample:")
-    print(ratings.head())
+    dataset = load_raw_data()
+    for name, frame in dataset.items():
+        print(f"{name}: {frame.shape}")

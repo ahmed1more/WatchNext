@@ -1,84 +1,44 @@
+from __future__ import annotations
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import pandas as pd
-import pickle
 
+from src.data_loader import load_raw_data
+from src.models.content_based import recommend_similar
+from src.models.hybrid_recommender import HybridRecommender
 
-
-# ===== Load Data =====
-movies = pickle.load(open("models/movies.pkl", "rb"))
-links = pd.read_csv("data/ml-latest-small/links.csv")
-# Merge movies with links to get tmdbId
-movies = movies.merge(links[["movieId", "tmdbId"]], on="movieId", how="left")
-
-predicted_df = pickle.load(open("models/predicted_df.pkl", "rb"))
-user_movie_matrix = pickle.load(open("models/user_movie_matrix.pkl", "rb"))
+dataset = load_raw_data()
+movies = dataset["movies"].merge(dataset["links"][["movieId", "tmdbId"]], on="movieId", how="left")
+recommender = HybridRecommender()
 
 app = FastAPI(title="WatchNext AI API")
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# ===== Recommendation Function =====
-def recommend_for_user(user_id, n=10):
-    if user_id not in user_movie_matrix.index:
-        return ["User not found"]
 
-    user_ratings = user_movie_matrix.loc[user_id]
-    seen_movies = user_ratings[user_ratings > 0].index
-
-    user_predictions = predicted_df.loc[user_id]
-    user_predictions = user_predictions.drop(seen_movies)
-
-    top_movies = user_predictions.sort_values(ascending=False).head(n)
-
-    result_movies = movies[movies["movieId"].isin(top_movies.index)]
-    return result_movies[["movieId", "title", "tmdbId"]].to_dict(orient="records")
-
-
-# ===== Routes =====
 @app.get("/")
 def home():
     return {"message": "WatchNext AI is running"}
 
 
 @app.get("/recommend/{user_id}")
-def get_recommendations(user_id: int):
-    return {
-        "user_id": user_id,
-        "recommendations": recommend_for_user(user_id)
-    }
+def get_recommendations(user_id: int, n: int = 10):
+    return {"user_id": user_id, "recommendations": recommender.recommend(user_id, top_n=n)}
+
 
 @app.get("/similar/{movie_id}")
 def similar_movies(movie_id: int, n: int = 10):
-    if movie_id not in user_movie_matrix.columns:
-        return {"error": "Movie not found"}
+    return {"movie_id": movie_id, "similar_movies": recommend_similar(movie_id, top_n=n)}
 
-    movie_vector = predicted_df[movie_id]
-
-    similarities = predicted_df.corrwith(movie_vector)
-
-    similar = similarities.sort_values(ascending=False).head(n + 1)
-
-    similar_movies_ids = similar.index[1:]
-    
-    result_movies = movies[movies["movieId"].isin(similar_movies_ids)]
-
-    return {
-        "movie_id": movie_id,
-        "similar_movies": result_movies[["movieId", "title", "tmdbId"]].to_dict(orient="records")
-    }
 
 @app.get("/movie/{movie_id}")
 def get_movie(movie_id: int):
     movie = movies[movies["movieId"] == movie_id]
-    
     if movie.empty:
         return {"error": "Movie not found"}
-    
     return movie.iloc[0].to_dict()
