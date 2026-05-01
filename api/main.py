@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import pickle
 
@@ -6,10 +7,22 @@ import pickle
 
 # ===== Load Data =====
 movies = pickle.load(open("models/movies.pkl", "rb"))
+links = pd.read_csv("data/ml-latest-small/links.csv")
+# Merge movies with links to get tmdbId
+movies = movies.merge(links[["movieId", "tmdbId"]], on="movieId", how="left")
+
 predicted_df = pickle.load(open("models/predicted_df.pkl", "rb"))
 user_movie_matrix = pickle.load(open("models/user_movie_matrix.pkl", "rb"))
 
 app = FastAPI(title="WatchNext AI API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 # ===== Recommendation Function =====
 def recommend_for_user(user_id, n=10):
@@ -24,7 +37,8 @@ def recommend_for_user(user_id, n=10):
 
     top_movies = user_predictions.sort_values(ascending=False).head(n)
 
-    return movies[movies["movieId"].isin(top_movies.index)]["title"].tolist()
+    result_movies = movies[movies["movieId"].isin(top_movies.index)]
+    return result_movies[["movieId", "title", "tmdbId"]].to_dict(orient="records")
 
 
 # ===== Routes =====
@@ -52,10 +66,12 @@ def similar_movies(movie_id: int, n: int = 10):
     similar = similarities.sort_values(ascending=False).head(n + 1)
 
     similar_movies_ids = similar.index[1:]
+    
+    result_movies = movies[movies["movieId"].isin(similar_movies_ids)]
 
     return {
         "movie_id": movie_id,
-        "similar_movies": movies[movies["movieId"].isin(similar_movies_ids)]["title"].tolist()
+        "similar_movies": result_movies[["movieId", "title", "tmdbId"]].to_dict(orient="records")
     }
 
 @app.get("/movie/{movie_id}")
