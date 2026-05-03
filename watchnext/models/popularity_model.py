@@ -1,5 +1,5 @@
 import pandas as pd
-from .data_loader import load_data
+from ..data_loader import load_data
 
 
 movies, ratings = load_data()
