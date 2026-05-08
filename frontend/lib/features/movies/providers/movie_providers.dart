@@ -4,15 +4,16 @@ import 'package:watch_next_frontend/features/movies/domain/models/movie.dart';
 
 class CurrentUserNotifier extends Notifier<int> {
   @override
-  int build() => 1;
+  int build() => 611;
 
   void updateUser(int id) {
     state = id;
   }
 }
 
-final currentUserProvider =
-    NotifierProvider<CurrentUserNotifier, int>(CurrentUserNotifier.new);
+final currentUserProvider = NotifierProvider<CurrentUserNotifier, int>(
+  CurrentUserNotifier.new,
+);
 
 final recommendationsProvider = FutureProvider.family<List<Movie>, int>((
   ref,
@@ -20,6 +21,11 @@ final recommendationsProvider = FutureProvider.family<List<Movie>, int>((
 ) {
   final apiService = ref.read(movieApiServiceProvider);
   return apiService.getRecommendations(userId);
+});
+
+final trendingProvider = FutureProvider<List<Movie>>((ref) {
+  final apiService = ref.read(movieApiServiceProvider);
+  return apiService.getTrendingMovies();
 });
 
 final similarMoviesProvider = FutureProvider.family<List<Movie>, int>((

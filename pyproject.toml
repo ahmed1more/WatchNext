@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "WatchNext is an end-to-end movie recommendation platform that helps users discover movies tailored to their interests and preferences."
 readme = "README.md"
 authors = [
-    { name = "Dev.Ahmed.Mostafa" }
+    { name = "dev.ahmed.mostafa" }
 ]
 requires-python = ">=3.12"
 dependencies = [
@@ -26,10 +26,12 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["watchnext*"]
+include = ["src*"]
 
 [tool.pyright]
-include = ["watchnext", "main.py", "api"]
+include = ["src", "main.py", "api"]
 executionEnvironments = [
   { root = "." }
 ]
+
+

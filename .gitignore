@@ -16,3 +16,7 @@ wheels/
 # Data files
 data/
 models/saved/
+
+
+# files
+*plan.md
