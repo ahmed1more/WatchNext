@@ -25,7 +25,7 @@ def ensure_models_trained():
         paths.saved_models / "content_similarity.pkl",
         paths.saved_models / "cf_svd.pkl",
         paths.saved_models / "neural_cf.pt",
-    ]
+    ] 
 
     if all(f.exists() for f in required_files):
         return
